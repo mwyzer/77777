@@ -8,27 +8,27 @@ Project ini adalah Customer Communication Dashboard untuk mengelola pesan custom
 
 Stack utama:
 
-* Backend: Golang + Gin
-* Frontend: React + Vite + TypeScript
-* Database: PostgreSQL
-* Queue/Cache/Realtime: Redis
-* Object Storage: MinIO
-* Container: Docker + Docker Compose
-* Orchestration: Kubernetes
-* Integration: Telegram Bot API dan WhatsApp API/Gateway
+- Backend: Golang + Gin
+- Frontend: React + Vite + TypeScript
+- Database: PostgreSQL
+- Queue/Cache/Realtime: Redis
+- Object Storage: MinIO
+- Container: Docker + Docker Compose
+- Orchestration: Kubernetes
+- Integration: Telegram Bot API dan WhatsApp API/Gateway
 
 MVP fokus pada:
 
-* Unified inbox
-* Reply manual
-* Auto-reply keyword
-* Template pesan
-* Histori percakapan
-* Attachment via MinIO
-* Queue Redis
-* Webhook Telegram
-* Webhook WhatsApp
-* Realtime inbox notification
+- Unified inbox
+- Reply manual
+- Auto-reply keyword
+- Template pesan
+- Histori percakapan
+- Attachment via MinIO
+- Queue Redis
+- Webhook Telegram
+- Webhook WhatsApp
+- Realtime inbox notification
 
 ---
 
@@ -75,9 +75,11 @@ Run test command
   ↓
 Fix errors if any
   ↓
-Update PHASE_STATUS.md
+Update PHASE_STATUS.md (mark PASSED + Pushed ✅)
   ↓
-Write phase report
+Write phase report in /project/phase-XX-report.md
+  ↓
+Run: .\scripts\git-push-phase.ps1 -Phase "XX" -Name "Phase Name"
   ↓
 Stop and wait for next instruction
 ```
@@ -98,10 +100,10 @@ SKIPPED
 
 Aturan update status:
 
-* Saat mulai mengerjakan phase, ubah status menjadi `IN_PROGRESS`.
-* Jika semua acceptance criteria berhasil, ubah status menjadi `PASSED`.
-* Jika masih ada error, ubah status menjadi `FAILED`.
-* Jangan ubah phase berikutnya menjadi `IN_PROGRESS` sebelum phase saat ini `PASSED`.
+- Saat mulai mengerjakan phase, ubah status menjadi `IN_PROGRESS`.
+- Jika semua acceptance criteria berhasil, ubah status menjadi `PASSED`.
+- Jika masih ada error, ubah status menjadi `FAILED`.
+- Jangan ubah phase berikutnya menjadi `IN_PROGRESS` sebelum phase saat ini `PASSED`.
 
 ---
 
@@ -161,7 +163,7 @@ Backend menggunakan Golang.
 
 Framework utama:
 
-* Gin
+- Gin
 
 Backend harus menggunakan struktur modular:
 
@@ -225,14 +227,14 @@ Frontend menggunakan React.
 
 Stack frontend:
 
-* React
-* Vite
-* TypeScript
-* Tailwind CSS
-* React Router
-* TanStack Query
-* Zustand
-* Axios
+- React
+- Vite
+- TypeScript
+- Tailwind CSS
+- React Router
+- TanStack Query
+- Zustand
+- Axios
 
 Struktur frontend:
 
@@ -296,12 +298,12 @@ provider_settings
 
 Redis digunakan untuk:
 
-* Queue pesan keluar
-* Retry pesan gagal
-* Idempotency webhook
-* Pub/Sub realtime notification
-* Cache dashboard summary
-* Rate limiting
+- Queue pesan keluar
+- Retry pesan gagal
+- Idempotency webhook
+- Pub/Sub realtime notification
+- Cache dashboard summary
+- Rate limiting
 
 Redis tidak boleh digunakan sebagai database utama.
 
@@ -355,13 +357,13 @@ MinIO digunakan untuk menyimpan attachment.
 
 Jenis file:
 
-* Gambar
-* Dokumen
-* PDF
-* Voice note
-* Bukti transfer
-* File komplain
-* File katalog
+- Gambar
+- Dokumen
+- PDF
+- Voice note
+- Bukti transfer
+- File komplain
+- File katalog
 
 Bucket default:
 
@@ -552,7 +554,7 @@ go run ./cmd/worker
 
 ## 17. Git Rules
 
-Disarankan setiap phase selesai langsung commit.
+Disarankan setiap phase selesai langsung commit dan push.
 
 Format commit:
 
@@ -563,6 +565,19 @@ feat(phase-03): add core inbox module
 feat(phase-04): add Telegram webhook
 feat(phase-05): add Redis queue worker
 ```
+
+**Auto-push rule:** Setiap kali status phase berubah menjadi `PASSED`, jalankan:
+
+```powershell
+.\scripts\git-push-phase.ps1 -Phase "XX" -Name "Phase Description"
+```
+
+Script akan otomatis:
+
+1. Verifikasi status PASSED di PHASE_STATUS.md
+2. `git add -A`
+3. `git commit -m "feat(phase-XX): description"`
+4. `git push origin main`
 
 Jangan commit:
 

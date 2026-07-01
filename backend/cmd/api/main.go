@@ -10,6 +10,7 @@ import (
 	"github.com/customer-comm-dashboard/backend/internal/database"
 	"github.com/customer-comm-dashboard/backend/internal/middleware"
 	"github.com/customer-comm-dashboard/backend/internal/modules/auth"
+	"github.com/customer-comm-dashboard/backend/internal/modules/inbox"
 	"github.com/customer-comm-dashboard/backend/internal/response"
 	"github.com/gin-gonic/gin"
 )
@@ -29,9 +30,17 @@ func main() {
 		migCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()
 		if err := authRepo.RunMigrations(migCtx); err != nil {
-			log.Printf("WARNING: Failed to run migrations: %v", err)
+			log.Printf("WARNING: Failed to run auth migrations: %v", err)
 		} else {
-			log.Println("Migrations completed successfully")
+			log.Println("Auth migrations completed successfully")
+		}
+
+		// Run inbox migrations
+		inboxRepo := inbox.NewRepository(database.Pool)
+		if err := inboxRepo.RunMigrations(migCtx); err != nil {
+			log.Printf("WARNING: Failed to run inbox migrations: %v", err)
+		} else {
+			log.Println("Inbox migrations completed successfully")
 		}
 	}
 
@@ -51,6 +60,11 @@ func main() {
 	authRepo := auth.NewRepository(database.Pool)
 	authService := auth.NewService(authRepo, cfg.JWTSecret)
 	authHandler := auth.NewHandler(authService)
+
+	// Initialize inbox module
+	inboxRepo := inbox.NewRepository(database.Pool)
+	inboxService := inbox.NewService(inboxRepo)
+	inboxHandler := inbox.NewHandler(inboxService)
 
 	// Setup Gin router
 	r := gin.Default()
@@ -115,6 +129,18 @@ func main() {
 	protectedAuth.Use(middleware.AuthRequired(authService))
 	{
 		protectedAuth.GET("/me", authHandler.Me)
+	}
+
+	// Protected inbox routes
+	inboxGroup := r.Group("/api/inbox")
+	inboxGroup.Use(middleware.AuthRequired(authService))
+	{
+		inboxGroup.GET("/conversations", inboxHandler.ListConversations)
+		inboxGroup.GET("/conversations/:id", inboxHandler.GetConversation)
+		inboxGroup.GET("/conversations/:id/messages", inboxHandler.ListMessages)
+		inboxGroup.POST("/conversations/:id/messages", inboxHandler.SendMessage)
+		inboxGroup.GET("/customers", inboxHandler.ListCustomers)
+		inboxGroup.GET("/customers/:id", inboxHandler.GetCustomer)
 	}
 
 	// Start server

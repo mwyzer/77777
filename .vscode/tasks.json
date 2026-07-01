@@ -164,6 +164,12 @@
 			"command": "docker ps 2>&1",
 			"problemMatcher": [],
 			"group": "none"
+		},
+		{
+			"label": "docker-up-test",
+			"type": "shell",
+			"command": "docker compose up -d --build 2>&1",
+			"group": "none"
 		}
 	]
 }
