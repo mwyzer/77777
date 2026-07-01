@@ -11,6 +11,8 @@ import (
 	"github.com/customer-comm-dashboard/backend/internal/middleware"
 	"github.com/customer-comm-dashboard/backend/internal/modules/auth"
 	"github.com/customer-comm-dashboard/backend/internal/modules/inbox"
+	"github.com/customer-comm-dashboard/backend/internal/modules/webhook"
+	"github.com/customer-comm-dashboard/backend/internal/providers/telegram"
 	"github.com/customer-comm-dashboard/backend/internal/response"
 	"github.com/gin-gonic/gin"
 )
@@ -65,6 +67,13 @@ func main() {
 	inboxRepo := inbox.NewRepository(database.Pool)
 	inboxService := inbox.NewService(inboxRepo)
 	inboxHandler := inbox.NewHandler(inboxService)
+
+	// Initialize Telegram provider
+	tgClient := telegram.NewClient(cfg.TelegramBotToken)
+
+	// Initialize webhook module (Telegram)
+	webhookService := webhook.NewService(inboxRepo, tgClient)
+	webhookHandler := webhook.NewHandler(webhookService)
 
 	// Setup Gin router
 	r := gin.Default()
@@ -122,6 +131,12 @@ func main() {
 	authGroup := r.Group("/api/auth")
 	{
 		authGroup.POST("/login", authHandler.Login)
+	}
+
+	// Public webhook routes (Telegram, WhatsApp)
+	webhookGroup := r.Group("/api/webhooks")
+	{
+		webhookGroup.POST("/telegram", webhookHandler.TelegramWebhook)
 	}
 
 	// Protected auth routes

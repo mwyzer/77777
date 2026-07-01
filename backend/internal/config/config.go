@@ -5,16 +5,17 @@ import (
 )
 
 type Config struct {
-	ServerPort     string
-	DatabaseURL    string
-	RedisAddr      string
-	RedisPass      string
-	MinioEndpoint  string
-	MinioAccessKey string
-	MinioSecretKey string
-	MinioBucket    string
-	MinioUseSSL    bool
-	JWTSecret      string
+	ServerPort       string
+	DatabaseURL      string
+	RedisAddr        string
+	RedisPass        string
+	MinioEndpoint    string
+	MinioAccessKey   string
+	MinioSecretKey   string
+	MinioBucket      string
+	MinioUseSSL      bool
+	JWTSecret        string
+	TelegramBotToken string
 }
 
 func Load() *Config {
@@ -28,7 +29,8 @@ func Load() *Config {
 		MinioSecretKey: getEnv("MINIO_SECRET_KEY", "minioadmin"),
 		MinioBucket:    getEnv("MINIO_BUCKET", "attachments"),
 		MinioUseSSL:    getEnv("MINIO_USE_SSL", "false") == "true",
-		JWTSecret:      getEnv("JWT_SECRET", "change-me-in-production"),
+		JWTSecret:        getEnv("JWT_SECRET", "change-me-in-production"),
+		TelegramBotToken: getEnv("TELEGRAM_BOT_TOKEN", ""),
 	}
 }
 

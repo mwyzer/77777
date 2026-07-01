@@ -8,7 +8,7 @@
 | 02    | Authentication        | PASSED | ✅     | JWT login, bcrypt hash, protected route, default admin, /api/auth/\*                       |
 | 03    | Core Inbox            | PASSED | ✅     | Customer, conversation, message, inbox API — 6 endpoints, pagination, search, filter       |
 | 04    | React Dashboard Base  | PASSED | ✅     | Login UI, layout sidebar, protected route, inbox + customer pages, TanStack Query, Zustand |
-| 05    | Telegram Integration  | TODO   | —      | Telegram webhook, receive message, reply message                                           |
+| 05    | Telegram Integration  | PASSED | ✅     | Telegram webhook, receive message, reply message via Bot API, idempotency via Redis        |
 | 06    | Redis Queue Worker    | TODO   | —      | Queue send message, retry, status update                                                   |
 | 07    | MinIO Attachment      | TODO   | —      | Presigned upload, signed download, attachment metadata                                     |
 | 08    | WhatsApp Integration  | TODO   | —      | WhatsApp webhook, provider interface, send message                                         |
