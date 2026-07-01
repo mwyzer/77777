@@ -1,0 +1,41 @@
+# ── Environment ──
+.env
+
+# ── Go ──
+*.exe
+*.test
+*.out
+vendor/
+backend/tmp/
+
+# ── Node / Frontend ──
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# ── Docker ──
+docker-compose.override.yml
+
+# ── IDE ──
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# ── OS ──
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ── Logs ──
+*.log
+hs_err_pid*.log
+
+# ── Temporary ──
+tmp/
+temp/
+*.tmp
+
+# ── AI / Tools ──
+.qodo/
