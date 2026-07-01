@@ -1,0 +1,169 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "go-mod-tidy",
+			"type": "shell",
+			"command": "cd backend && go mod tidy",
+			"group": "none"
+		},
+		{
+			"label": "check-go",
+			"type": "shell",
+			"command": "where go && go version",
+			"group": "none"
+		},
+		{
+			"label": "go-mod-tidy-backend",
+			"type": "shell",
+			"command": "cd c:\\mysites\\77777\\backend && go mod tidy && echo DONE",
+			"group": "none"
+		},
+		{
+			"label": "docker-compose-build",
+			"type": "shell",
+			"command": "cd c:\\mysites\\77777 && docker compose build --no-cache",
+			"group": "none"
+		},
+		{
+			"label": "docker-build",
+			"type": "shell",
+			"command": "docker compose build --no-cache 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-build-v2",
+			"type": "shell",
+			"command": "docker compose build --no-cache 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-build-v3",
+			"type": "shell",
+			"command": "docker compose build --no-cache 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "delete-bad-go-sum",
+			"type": "shell",
+			"command": "cd c:\\mysites\\77777\\backend && del go.sum 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "delete-go-sum",
+			"type": "shell",
+			"command": "powershell -Command \"Remove-Item -Path 'c:\\mysites\\77777\\backend\\go.sum' -Force\"",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-build-v4",
+			"type": "shell",
+			"command": "docker compose build --no-cache 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-build-v5",
+			"type": "shell",
+			"command": "docker compose build --no-cache 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-build-v6",
+			"type": "shell",
+			"command": "docker compose build --no-cache 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-build-v7",
+			"type": "shell",
+			"command": "docker compose build --no-cache 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-info",
+			"type": "shell",
+			"command": "docker info 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "start-docker",
+			"type": "shell",
+			"command": "\"C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe\" &",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-build-v8",
+			"type": "shell",
+			"command": "docker compose build --no-cache 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-wait",
+			"type": "shell",
+			"command": "timeout /t 15 /nobreak >nul && docker compose build --no-cache 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-build-now",
+			"type": "shell",
+			"command": "docker compose build --no-cache 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-up",
+			"type": "shell",
+			"command": "docker compose up -d --build 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-final-build",
+			"type": "shell",
+			"command": "cd c:\\mysites\\77777 && docker compose build 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-ping",
+			"type": "shell",
+			"command": "docker ps 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-final",
+			"type": "shell",
+			"command": "docker compose up -d --build 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-build-phase02",
+			"type": "shell",
+			"command": "del /q c:\\mysites\\77777\\backend\\go.sum 2>nul & docker compose build --no-cache 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		},
+		{
+			"label": "docker-check",
+			"type": "shell",
+			"command": "docker ps 2>&1",
+			"problemMatcher": [],
+			"group": "none"
+		}
+	]
+}

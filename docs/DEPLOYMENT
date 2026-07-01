@@ -1,0 +1,475 @@
+# DEPLOYMENT.md
+
+# Deployment Guide — Customer Communication Dashboard
+
+## 1. Overview
+
+Project ini menggunakan stack:
+
+* Backend: Golang + Gin
+* Frontend: React + Vite + TypeScript
+* Database: PostgreSQL
+* Queue/Cache/Realtime: Redis
+* Object Storage: MinIO
+* Container: Docker + Docker Compose
+* Orchestration: Kubernetes
+* Integration: Telegram Bot API dan WhatsApp API/Gateway
+
+Deployment dibagi menjadi 3 mode:
+
+1. Local development menggunakan Docker Compose.
+2. MVP production menggunakan VPS + Docker Compose.
+3. Scalable production menggunakan Kubernetes.
+
+---
+
+## 2. Environment Requirement
+
+Minimal untuk development:
+
+```text
+CPU: 2 Core
+RAM: 4 GB
+Storage: 20 GB
+Docker: installed
+Docker Compose: installed
+```
+
+Minimal untuk MVP VPS:
+
+```text
+CPU: 2–4 Core
+RAM: 4–8 GB
+Storage: 40–80 GB
+OS: Ubuntu 22.04 / 24.04
+Docker: installed
+Docker Compose: installed
+Domain: optional
+SSL: recommended
+```
+
+Untuk Kubernetes:
+
+```text
+Kubernetes cluster
+kubectl
+Ingress controller
+Storage class
+Container registry
+```
+
+---
+
+## 3. Local Development Deployment
+
+### 3.1 Clone Project
+
+```bash
+git clone <repository-url>
+cd customer-communication-dashboard
+```
+
+### 3.2 Copy Environment File
+
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
+
+### 3.3 Run Services
+
+```bash
+docker compose up -d --build
+```
+
+### 3.4 Check Containers
+
+```bash
+docker compose ps
+```
+
+Expected running services:
+
+```text
+postgres
+redis
+minio
+backend
+frontend
+worker
+```
+
+### 3.5 Health Check
+
+```bash
+curl http://localhost:8080/health
+```
+
+Expected response:
+
+```json
+{
+  "success": true,
+  "message": "Service is healthy",
+  "data": {
+    "app": "ok",
+    "postgres": "ok",
+    "redis": "ok",
+    "minio": "ok"
+  }
+}
+```
+
+### 3.6 Access Frontend
+
+```text
+http://localhost:5173
+```
+
+### 3.7 Access MinIO Console
+
+```text
+http://localhost:9001
+```
+
+Default development credential:
+
+```text
+Username: minioadmin
+Password: minioadmin123
+```
+
+---
+
+## 4. Docker Compose Production Deployment
+
+### 4.1 Prepare VPS
+
+```bash
+sudo apt update
+sudo apt install -y docker.io docker-compose-plugin nginx certbot python3-certbot-nginx
+sudo systemctl enable docker
+sudo systemctl start docker
+```
+
+### 4.2 Upload Project to VPS
+
+```bash
+git clone <repository-url>
+cd customer-communication-dashboard
+```
+
+### 4.3 Configure Environment
+
+Create production env:
+
+```bash
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+```
+
+Edit backend env:
+
+```env
+APP_ENV=production
+APP_PORT=8080
+
+DB_HOST=postgres
+DB_PORT=5432
+DB_USER=postgres
+DB_PASSWORD=change-secure-password
+DB_NAME=cs_dashboard
+
+JWT_SECRET=change-very-secure-jwt-secret
+
+REDIS_HOST=redis
+REDIS_PORT=6379
+REDIS_PASSWORD=
+
+MINIO_ENDPOINT=minio:9000
+MINIO_ACCESS_KEY=change-minio-user
+MINIO_SECRET_KEY=change-minio-password
+MINIO_BUCKET=chat-media
+MINIO_USE_SSL=false
+
+TELEGRAM_BOT_TOKEN=
+TELEGRAM_WEBHOOK_SECRET=
+
+WHATSAPP_PROVIDER=cloud_api
+WHATSAPP_ACCESS_TOKEN=
+WHATSAPP_PHONE_NUMBER_ID=
+WHATSAPP_VERIFY_TOKEN=
+```
+
+Frontend env:
+
+```env
+VITE_API_URL=https://api.yourdomain.com
+```
+
+### 4.4 Run Production
+
+```bash
+docker compose up -d --build
+```
+
+### 4.5 Check Logs
+
+```bash
+docker compose logs -f backend
+docker compose logs -f worker
+docker compose logs -f frontend
+```
+
+---
+
+## 5. Nginx Reverse Proxy
+
+Example Nginx config:
+
+```nginx
+server {
+    listen 80;
+    server_name app.yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:5173;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+
+server {
+    listen 80;
+    server_name api.yourdomain.com;
+
+    location / {
+        proxy_pass http://localhost:8080;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+Enable config:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/cs-dashboard /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+---
+
+## 6. SSL with Certbot
+
+```bash
+sudo certbot --nginx -d app.yourdomain.com -d api.yourdomain.com
+```
+
+Test renewal:
+
+```bash
+sudo certbot renew --dry-run
+```
+
+---
+
+## 7. Telegram Webhook Setup
+
+Set Telegram webhook:
+
+```bash
+curl -X POST "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook" \
+  -d "url=https://api.yourdomain.com/api/webhooks/telegram"
+```
+
+Check webhook:
+
+```bash
+curl "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/getWebhookInfo"
+```
+
+---
+
+## 8. WhatsApp Webhook Setup
+
+For WhatsApp Cloud API:
+
+Webhook callback URL:
+
+```text
+https://api.yourdomain.com/api/webhooks/whatsapp
+```
+
+Verify token must match:
+
+```env
+WHATSAPP_VERIFY_TOKEN=your-verify-token
+```
+
+Webhook events:
+
+```text
+messages
+message_status
+```
+
+---
+
+## 9. MinIO Production Notes
+
+For MVP, MinIO can run inside Docker Compose.
+
+For serious production, consider:
+
+* Dedicated MinIO server
+* S3-compatible provider
+* AWS S3
+* Cloudflare R2
+* DigitalOcean Spaces
+
+MinIO bucket should not be public.
+
+Access must use signed URL or presigned upload URL.
+
+---
+
+## 10. Kubernetes Deployment
+
+### 10.1 Apply Namespace
+
+```bash
+kubectl apply -f k8s/namespace.yaml
+```
+
+### 10.2 Apply Config
+
+```bash
+kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/secret.yaml
+```
+
+### 10.3 Apply Storage
+
+```bash
+kubectl apply -f k8s/postgres-pvc.yaml
+kubectl apply -f k8s/redis-pvc.yaml
+kubectl apply -f k8s/minio-pvc.yaml
+```
+
+### 10.4 Apply Services
+
+```bash
+kubectl apply -f k8s/
+```
+
+### 10.5 Check Pods
+
+```bash
+kubectl get pods -n cs-dashboard
+```
+
+### 10.6 Check Services
+
+```bash
+kubectl get svc -n cs-dashboard
+```
+
+### 10.7 Check Ingress
+
+```bash
+kubectl get ingress -n cs-dashboard
+```
+
+---
+
+## 11. Deployment Verification
+
+After deployment, verify:
+
+```bash
+curl https://api.yourdomain.com/health
+```
+
+Checklist:
+
+* [ ] Backend health OK
+* [ ] PostgreSQL connected
+* [ ] Redis connected
+* [ ] MinIO connected
+* [ ] Frontend accessible
+* [ ] Login works
+* [ ] Telegram webhook works
+* [ ] WhatsApp webhook works
+* [ ] Worker running
+* [ ] Redis queue works
+* [ ] Attachment upload works
+* [ ] Signed URL works
+
+---
+
+## 12. Rollback Strategy
+
+For Docker Compose:
+
+```bash
+git checkout <previous-commit>
+docker compose up -d --build
+```
+
+For Kubernetes:
+
+```bash
+kubectl rollout undo deployment/backend -n cs-dashboard
+kubectl rollout undo deployment/frontend -n cs-dashboard
+kubectl rollout undo deployment/worker -n cs-dashboard
+```
+
+---
+
+## 13. Backup Strategy
+
+### PostgreSQL Backup
+
+```bash
+docker exec -t postgres pg_dump -U postgres cs_dashboard > backup.sql
+```
+
+### PostgreSQL Restore
+
+```bash
+cat backup.sql | docker exec -i postgres psql -U postgres -d cs_dashboard
+```
+
+### MinIO Backup
+
+Backup MinIO data volume regularly.
+
+Recommended:
+
+```text
+Daily backup for database
+Weekly backup for MinIO files
+Retention: 7 daily, 4 weekly, 3 monthly
+```
+
+---
+
+## 14. Production Recommendation
+
+For MVP:
+
+```text
+VPS + Docker Compose
+```
+
+For scalable production:
+
+```text
+Kubernetes + managed PostgreSQL + managed Redis + external object storage
+```
+
+Do not start with Kubernetes unless the MVP core features are stable.
